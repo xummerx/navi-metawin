@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UFO $NAVI Ad - Final Version</title>
+    <style>
+        /* Basic Setup */
+        body {
+            margin: 0; padding: 0; display: flex;
+            justify-content: center; align-items: center;
+            height: 100vh; background-color: #f0f0f0;
+        }
+
+        /* The main ad container */
+        .ad-container {
+            width: 300px;
+            height: 250px;
+            background: radial-gradient(ellipse at bottom, #0c1a3a 0%, #000411 100%);
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            font-family: 'Segoe UI', Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+            border: 1px solid #2a3a5a;
+            box-sizing: border-box;
+            display: block;
+            text-decoration: none;
+        }
+        
+        .shake {
+            animation: screenShake 0.3s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        /* --- SCENE ELEMENTS --- */
+        #moon {
+            position: absolute; top: 20px; right: 25px; width: 40px;
+            height: 40px; background-color: #e0e0e0; border-radius: 50%;
+            box-shadow: 0 0 15px #fff, 0 0 25px #fff, inset -5px -2px 5px rgba(0,0,0,0.2);
+            z-index: 5;
+        }
+
+        .star {
+            position: absolute; background-color: #fff; border-radius: 50%;
+            z-index: 1; animation: fall 10s linear infinite;
+        }
+        .star.s1 { width: 1px; height: 1px; left: 15%; animation-duration: 10s; }
+        .star.s2 { width: 2px; height: 2px; left: 40%; animation-duration: 6s; }
+        .star.s3 { width: 1px; height: 1px; left: 75%; animation-duration: 12s; }
+        
+        .meteor {
+            position: absolute; width: 3px; height: 3px;
+            background-color: #ffcc66; border-radius: 50%;
+            box-shadow: 0 0 10px #ffcc66, 0 0 20px #ff6600;
+            z-index: 15; animation: meteor-shower 2s linear infinite;
+            opacity: 0;
+        }
+        .m1 { animation-delay: 0.5s; animation-duration: 1.5s; }
+        .m2 { animation-delay: 2s; animation-duration: 2s; }
+        .m3 { animation-delay: 4.5s; animation-duration: 1.8s; }
+
+        #alien {
+            position: absolute; width: 100px; z-index: 25;
+            opacity: 0; left: 100px; top: 90px;
+        }
+        #alien:hover {
+            transform: scale(1.1) rotate(-5deg);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        /* --- DYNAMIC ANIMATED ELEMENTS --- */
+        
+        #ufo {
+            position: absolute; width: 100px; z-index: 10;
+            animation: flyToTheMoon 10s ease-in-out forwards;
+        }
+        #ufo::before {
+            content: '';
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 50px solid rgba(0, 234, 255, 0.3);
+            z-index: -1;
+            animation: pulseBeam 2s ease-in-out infinite;
+        }
+        #ufo::after {
+            content: '';
+            position: absolute;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 25px;
+            height: 8px;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px #fff, 0 0 20px #fff;
+            opacity: 0;
+            animation: flashLights 0.4s steps(2, end) infinite;
+            animation-delay: 8.5s;
+        }
+
+        #multiplier-text {
+            position: absolute; top: 20px; left: 20px; font-size: 38px;
+            font-weight: 700; color: #00eaff;
+            text-shadow: 0 0 5px #00eaff, 0 0 15px #00eaff, 0 0 25px #00eaff;
+            z-index: 20; transform-origin: center;
+            transition: transform 0.2s ease-out, color 0.2s ease-out, opacity 0.5s ease-in-out;
+        }
+
+        #multiplier-text.final {
+            color: #00ff8c; transform: scale(1.15);
+            text-shadow: 0 0 5px #00ff8c, 0 0 15px #00ff8c, 0 0 35px #00ff8c;
+        }
+        
+        #speech-bubble {
+            position: absolute;
+            top: 45px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(45deg, #52d66c, #6cff8c);
+            color: #0c1a3a;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            z-index: 26;
+            opacity: 0;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.2);
+            box-shadow: 0 4px 15px rgba(82, 214, 108, 0.5);
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        #speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 8px 8px 0;
+            border-style: solid;
+            border-color: #6cff8c transparent transparent transparent;
+        }
+        
+        .cta-container {
+            position: absolute; bottom: 25px; left: 0; right: 0;
+            text-align: center; z-index: 30;
+        }
+        .cta-button {
+            display: inline-block; background: linear-gradient(45deg, #00aaff, #00eaff);
+            color: #fff; padding: 12px 30px; border-radius: 30px; font-size: 18px;
+            font-weight: bold; text-shadow: 0 0 5px rgba(0,0,0,0.5);
+            box-shadow: 0 0 15px #00eaff; animation: pulse 2.5s infinite;
+        }
+        
+        /* --- SCENE 2 STYLES --- */
+        .scene-2-active #ufo { animation: ufoHover 4s ease-in-out infinite; }
+        .scene-2-active #ufo::before, .scene-2-active #ufo::after { display: none; }
+        .scene-2-active #alien { animation: alienFlyForward 1s ease-out forwards; }
+        .scene-2-active #multiplier-text { opacity: 0; }
+        .scene-2-active #speech-bubble {
+            opacity: 1;
+            width: 130px;
+            animation: typeWriter 1.5s steps(12) 0.8s forwards, blinkCaret 0.75s step-end infinite;
+            border-right: 3px solid #0c1a3a;
+        }
+        .scene-2-active .meteor { display: none; }
+
+        /* --- KEYFRAME ANIMATIONS --- */
+        
+        @keyframes flyToTheMoon {
+            0% { transform: translate(-100px, 250px) rotate(-20deg) scale(0.7); }
+            50% { transform: translate(80px, 40px) rotate(20deg) scale(1); }
+            100% { transform: translate(210px, -10px) rotate(-5deg) scale(0.2); }
+        }
+        @keyframes ufoHover {
+            0%, 100% { transform: translate(210px, -10px) rotate(-5deg) scale(0.2); }
+            50% { transform: translate(212px, -15px) rotate(5deg) scale(0.2); }
+        }
+        @keyframes alienFlyForward {
+            from { opacity: 1; transform-origin: center; transform: translate(-100px, -100px) scale(0.2); }
+            to { opacity: 1; transform-origin: center; transform: translate(0, 0) scale(1); }
+        }
+        @keyframes pulseBeam {
+            0%, 100% { opacity: 0.3; transform: translateX(-50%) scaleY(1); }
+            50% { opacity: 0.7; transform: translateX(-50%) scaleY(1.05); }
+        }
+        @keyframes flashLights {
+            from { opacity: 1; } to { opacity: 0; }
+        }
+        @keyframes screenShake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        @keyframes typeWriter {
+            from { width: 0; }
+            to { width: 130px; }
+        }
+        @keyframes blinkCaret {
+            from, to { border-color: transparent; }
+            50% { border-color: #0c1a3a; }
+        }
+
+        @keyframes meteor-shower {
+            0% { opacity: 1; transform: translate(350px, -50px) rotate(-45deg); }
+            100% { opacity: 1; transform: translate(-100px, 300px) rotate(-45deg); }
+        }
+        @keyframes fall {
+            from { top: -10px; } to { top: 260px; }
+        }
+        @keyframes pulse {
+            0%   { transform: scale(1); }
+            50%  { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <a href="https://dexscreener.com/ethereum/0xd224952df6604f90b6ef13c19411ba30401b347a30dc5d15366460cd64112b40" target="_blank" class="ad-container">
+        
+        <div id="moon"></div>
+        <div class="star s1"></div>
+        <div class="star s2"></div>
+        <div class="star s3"></div>
+
+        <div class="meteor m1"></div>
+        <div class="meteor m2"></div>
+        <div class="meteor m3"></div>
+
+        <img id="ufo" src="ufo2.png" alt="Flying UFO">
+        
+        <div id="multiplier-text">1.00x</div>
+        
+        <div id="speech-bubble">take it home</div>
+        <img id="alien" src="alien.gif" alt="Dancing Alien">
+
+        <div class="cta-container">
+            <div class="cta-button">Buy $NAVI</div>
+        </div>
+    </a>
+
+    <script>
+        const adContainer = document.querySelector('.ad-container');
+        const multiplierElement = document.getElementById('multiplier-text');
+        
+        const numbers = [
+            '1.00x', '1111.11x', '2222.22x', '3333.33x', '4444.44x', 
+            '5555.55x', '6666.66x', '7777.77x', '8888.88x', '9999.99x'
+        ];
+
+        const scene1Duration = 10000;
+        const scene2Duration = 10000;
+        const totalLoopDuration = scene1Duration + scene2Duration;
+        
+        const counterDuration = 10000; 
+        const stepInterval = counterDuration / numbers.length;
+
+        function runScene1() {
+            multiplierElement.style.opacity = '1';
+            multiplierElement.classList.remove('final');
+
+            let currentIndex = 0;
+            function updateNumber() {
+                if (currentIndex < numbers.length) {
+                    multiplierElement.textContent = numbers[currentIndex];
+                    
+                    if (currentIndex === numbers.length - 1) {
+                        multiplierElement.classList.add('final');
+                        
+                        adContainer.classList.add('shake');
+                        setTimeout(() => {
+                            adContainer.classList.remove('shake');
+                        }, 400);
+                    }
+                    
+                    currentIndex++;
+                    setTimeout(updateNumber, stepInterval);
+                }
+            }
+            updateNumber();
+        }
+
+        function masterLoop() {
+            adContainer.classList.remove('scene-2-active');
+            runScene1();
+
+            setTimeout(() => {
+                adContainer.classList.add('scene-2-active');
+            }, scene1Duration);
+        }
+
+        masterLoop();
+        setInterval(masterLoop, totalLoopDuration);
+
+    </script>
+
+</body>
+</html>
